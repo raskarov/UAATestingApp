@@ -1,0 +1,36 @@
+GEM
+  remote: http://rubygems.org/
+  specs:
+    addressable (2.2.6)
+    columnize (0.3.6)
+    em-http-request (0.3.0)
+      addressable (>= 2.0.0)
+      escape_utils
+      eventmachine (>= 0.12.9)
+    em-websocket-client (0.1.1)
+      eventmachine
+      libwebsocket
+    escape_utils (0.2.4)
+    eventmachine (0.12.10)
+    json (1.6.4)
+    libwebsocket (0.1.1)
+    linecache (0.46)
+      rbx-require-relative (> 0.0.4)
+    nokogiri (1.5.0)
+    rbx-require-relative (0.0.5)
+    ruby-debug (0.10.4)
+      columnize (>= 0.1)
+      ruby-debug-base (~> 0.10.4.0)
+    ruby-debug-base (0.10.4)
+      linecache (>= 0.3)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  em-http-request
+  em-websocket-client
+  eventmachine
+  json
+  nokogiri
+  ruby-debug
