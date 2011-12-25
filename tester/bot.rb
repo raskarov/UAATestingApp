@@ -1,7 +1,7 @@
 require 'uri'
 
 module Tester
-  class Bot < Struct.new(:game_uri)
+  class Bot < Struct.new(:game_uri, :min_price, :max_price)
     def logger
       Tester::Base.logger
     end
@@ -14,7 +14,6 @@ module Tester
         update_cookie(http.response_header['SET_COOKIE'])
         if room_id
           logger.info "redirected to room #{room_id} (#{@waiting_location})"
-          logger.info "cookie: #{cookie}"
           waiting_for_game
         else
           logger.error "wrong password"
@@ -66,12 +65,12 @@ module Tester
           @timer = nil
         end
       else
-        logger.warn "Unknown command: #{cmd_string}"
+        # logger.warn "Unknown command: #{cmd_string}"
       end
     end
 
     def make_bid
-      value = rand(300)
+      value = min_price + rand(max_price - min_price)
       http = EventMachine::HttpRequest.new(bid_url).post(:body => {'bid[value]' => value, :auction_id => @game_id}, :head => {:cookie => cookie})
 
       http.callback do |response|
