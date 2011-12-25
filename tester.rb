@@ -5,6 +5,7 @@ require 'eventmachine'
 require 'em-http-request'
 require 'em-websocket-client'
 require 'json'
+require 'nokogiri'
 require 'ruby-debug'
 $LOAD_PATH << '.' unless $LOAD_PATH.include?('.')
 require 'tester/base'

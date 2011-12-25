@@ -35,7 +35,7 @@ module Tester
     def waiting_for_game
       http = EventMachine::HttpRequest.new(@waiting_location).get(:head => {:cookie => cookie})
 
-      http.callback do |response|
+      http.callback do
         res = %r{new Socky\('([^'']+)', '([^'']+)', '([^'']+)'\)}.match http.response
         listen_websocket(res[1], res[2], res[3])
       end
@@ -53,11 +53,7 @@ module Tester
       cmd = JSON.parse(cmd_string)
       case cmd['body']
       when /Room\.startGame/
-        @game_id = %r{Room\.startGame\(.+, (\d+)\)}.match(cmd['body'])[1]
-        logger.info "Game #{@game_id} started"
-        @timer = EM.add_periodic_timer(1) do
-          make_bid
-        end
+        play(cmd)
       when /Room\.stopGame/
         logger.info "Game stopped"
         if @timer
@@ -69,12 +65,28 @@ module Tester
       end
     end
 
+    def play(cmd)
+      res = %r{Room\.startGame\(\"(.+)\", (\d+)\)}.match(cmd['body'])
+      @game_url = res[1]
+      @game_id = res[2]
+      http = EventMachine::HttpRequest.new(@game_url).get(:head => {:cookie => cookie})
+
+      http.callback do
+        html = Nokogiri::HTML.parse(http.response)
+        @member_name = html.css('table.game-table tr:first-child td:first-child').first.inner_text.strip
+        logger.info "Play game #{@game_id} as #{@member_name}"
+        @timer = EM.add_periodic_timer(1) do
+          make_bid
+        end
+      end
+    end
+
     def make_bid
       value = min_price + rand(max_price - min_price)
       http = EventMachine::HttpRequest.new(bid_url).post(:body => {'bid[value]' => value, :auction_id => @game_id}, :head => {:cookie => cookie})
 
-      http.callback do |response|
-        logger.info "bid of $#{value} have made, status #{http.response_header.status}"
+      http.callback do
+        logger.info "#{@member_name}: bid of $#{value} have made, status #{http.response_header.status}"
       end
     end
 
@@ -88,10 +100,6 @@ module Tester
 
     def cookie
       @cookie.map { |k, v| "#{k}=#{v}" }.join('; ')
-    end
-
-    def get_location(response)
-      response[:headers].find {|h| h =~ /^Location: / }.gsub(/^Location: /, '')
     end
   end
 end
