@@ -11,7 +11,7 @@ module Tester
 
       http.callback do
         @waiting_location = http.response_header['LOCATION']
-        update_cookie(http.response_header['SET_COOKIE'])
+        update_cookie(http.response_header['SET_COOKIE'].to_s)
         if room_id
           logger.info "redirected to room #{room_id} (#{@waiting_location})"
           waiting_for_game
@@ -83,7 +83,7 @@ module Tester
 
     def make_bid
       value = min_price + rand(max_price - min_price)
-      http = EventMachine::HttpRequest.new(bid_url).post(:body => {'bid[value]' => value, :auction_id => @game_id}, :head => {:cookie => cookie})
+      http = EventMachine::HttpRequest.new(bid_url).post(:body => {'bid[value]' => value, 'bid[auction_id]' => @game_id}, :head => {:cookie => cookie})
 
       http.callback do
         logger.info "#{@member_name}: bid of $#{value} have made, status #{http.response_header.status}"
